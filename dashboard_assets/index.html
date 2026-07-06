@@ -1,0 +1,1432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lovable Clone - AI Web App Builder</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Prism.js for Code Highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <style>
+        :root {
+            --bg-main: #06050c;
+            --bg-surface: rgba(22, 19, 39, 0.45);
+            --bg-card: rgba(26, 23, 49, 0.7);
+            --bg-input: rgba(14, 12, 28, 0.9);
+            --border-glow: rgba(139, 92, 246, 0.25);
+            --border-hover: rgba(139, 92, 246, 0.6);
+            --primary: #8b5cf6;
+            --primary-glow: rgba(139, 92, 246, 0.5);
+            --secondary: #ec4899;
+            --accent: #06b6d4;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --text-bright: #ffffff;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(236, 72, 153, 0.12) 0%, transparent 40%);
+        }
+
+        /* Scrollbar styles */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(139, 92, 246, 0.3);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(139, 92, 246, 0.6);
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: rgba(13, 11, 26, 0.7);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(139, 92, 246, 0.15);
+            z-index: 10;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            font-size: 1.75rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 8px var(--primary-glow));
+            animation: pulse-glow 3s infinite alternate;
+        }
+
+        .logo-text {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 1.5rem;
+            letter-spacing: -0.5px;
+            background: linear-gradient(to right, #ffffff, #d8b4fe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo-badge {
+            background: rgba(139, 92, 246, 0.15);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            padding: 0.2rem 0.6rem;
+            border-radius: 99px;
+            font-size: 0.75rem;
+            color: #d8b4fe;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .model-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 0.4rem 0.9rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .model-badge i {
+            color: var(--accent);
+        }
+
+        .main-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Left Side: Builder Controls */
+        .sidebar {
+            width: 420px;
+            background: rgba(13, 11, 26, 0.5);
+            backdrop-filter: blur(16px);
+            border-right: 1px solid rgba(139, 92, 246, 0.12);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .section-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-bright);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .section-title i {
+            color: var(--primary);
+        }
+
+        /* Suggestion Pills */
+        .suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .suggestion-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            color: var(--text-muted);
+            padding: 0.4rem 0.8rem;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .suggestion-btn:hover {
+            background: rgba(139, 92, 246, 0.1);
+            border-color: rgba(139, 92, 246, 0.3);
+            color: var(--text-main);
+            transform: translateY(-1px);
+        }
+
+        /* Input Card */
+        .input-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-glow);
+            border-radius: 16px;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: border-color 0.3s ease;
+        }
+
+        .input-card:focus-within {
+            border-color: var(--border-hover);
+        }
+
+        textarea {
+            width: 100%;
+            height: 100px;
+            background: var(--bg-input);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 0.75rem;
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 0.95rem;
+            resize: none;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        textarea:focus {
+            border-color: rgba(139, 92, 246, 0.4);
+        }
+
+        .btn-generate {
+            width: 100%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            color: white;
+            padding: 0.85rem;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .btn-generate:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(139, 92, 246, 0.6);
+            filter: brightness(1.1);
+        }
+
+        .btn-generate:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .btn-generate:disabled {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-muted);
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        /* Steps Progress Tracker */
+        .status-tracker {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .step-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            opacity: 0.4;
+            transition: opacity 0.3s ease;
+        }
+
+        .step-item.active {
+            opacity: 1;
+        }
+
+        .step-item.completed {
+            opacity: 0.85;
+        }
+
+        .step-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: bold;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            flex-shrink: 0;
+            color: var(--text-muted);
+            transition: all 0.3s;
+        }
+
+        .step-item.active .step-icon {
+            background: rgba(139, 92, 246, 0.2);
+            border-color: var(--primary);
+            color: #d8b4fe;
+            box-shadow: 0 0 10px rgba(139, 92, 246, 0.4);
+        }
+
+        .step-item.completed .step-icon {
+            background: rgba(16, 185, 129, 0.15);
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        .step-content {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .step-title {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-bright);
+        }
+
+        .step-desc {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            line-height: 1.3;
+        }
+
+        /* Step Progress Bar */
+        .progress-bar-container {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            overflow: hidden;
+            display: none;
+            margin-top: 0.5rem;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        /* Console Logs */
+        .console-card {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            flex: 1;
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .console-header {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0.5rem 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-family: 'Fira Code', monospace;
+        }
+
+        .console-body {
+            flex: 1;
+            padding: 0.75rem;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.75rem;
+            line-height: 1.4;
+            overflow-y: auto;
+            color: #d1d5db;
+            white-space: pre-wrap;
+            background: #040308;
+        }
+
+        .console-line-info { color: #818cf8; }
+        .console-line-success { color: #34d399; }
+        .console-line-error { color: #f87171; }
+        .console-line-warn { color: #fbbf24; }
+
+        /* Right Side: Showcase Panel */
+        .showcase {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: rgba(10, 8, 20, 0.2);
+        }
+
+        .tabs-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(13, 11, 26, 0.3);
+            border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+            padding: 0 1.5rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            padding: 1.25rem 0.25rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            position: relative;
+            transition: color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-main);
+        }
+
+        .tab-btn.active {
+            color: var(--primary);
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            box-shadow: 0 -2px 10px var(--primary-glow);
+        }
+
+        .preview-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .control-btn {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--text-main);
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .control-btn:hover {
+            background: rgba(139, 92, 246, 0.15);
+            border-color: var(--primary);
+            color: var(--text-bright);
+        }
+
+        .control-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+            box-shadow: 0 0 8px rgba(139, 92, 246, 0.4);
+        }
+
+        .preview-address-bar {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 0.35rem 0.85rem;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-family: 'Fira Code', monospace;
+            color: var(--text-muted);
+            max-width: 250px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Tab Content panels */
+        .tab-panel {
+            flex: 1;
+            display: none;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .tab-panel.active {
+            display: flex;
+        }
+
+        /* Preview Panel */
+        #preview-panel {
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #030206;
+            padding: 1.5rem;
+        }
+
+        .iframe-container {
+            width: 100%;
+            height: 100%;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+            overflow: hidden;
+            transition: width 0.3s ease, height 0.3s ease;
+            position: relative;
+        }
+
+        .iframe-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: white;
+        }
+
+        .iframe-placeholder {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-main);
+            color: var(--text-muted);
+            gap: 1rem;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .iframe-placeholder i {
+            font-size: 3rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 8px var(--primary-glow));
+        }
+
+        /* Code panel (Explorer + Editor) */
+        #code-panel {
+            display: none; /* dynamically flex */
+        }
+        #code-panel.active {
+            display: flex;
+        }
+
+        .code-explorer {
+            width: 260px;
+            background: rgba(13, 11, 26, 0.4);
+            border-right: 1px solid rgba(139, 92, 246, 0.08);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .explorer-header {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(139, 92, 246, 0.08);
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--text-bright);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .explorer-tree {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0.5rem;
+        }
+
+        /* Folder Tree UI */
+        .tree-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.35rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.15s;
+        }
+
+        .tree-item:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .tree-item.selected {
+            background: rgba(139, 92, 246, 0.15);
+            color: #d8b4fe;
+            font-weight: 500;
+        }
+
+        .tree-folder-children {
+            padding-left: 1rem;
+            display: block;
+        }
+
+        .tree-folder-children.collapsed {
+            display: none;
+        }
+
+        .tree-item i {
+            width: 16px;
+            text-align: center;
+        }
+
+        .tree-item .fa-folder { color: #f59e0b; }
+        .tree-item .fa-folder-open { color: #f59e0b; }
+        .tree-item .fa-file-code { color: #60a5fa; }
+        .tree-item .fa-html5 { color: #f97316; }
+        .tree-item .fa-css3-alt { color: #3b82f6; }
+        .tree-item .fa-js { color: #eab308; }
+
+        .code-editor {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: #0a0814;
+        }
+
+        .editor-header {
+            padding: 0.75rem 1.5rem;
+            background: rgba(13, 11, 26, 0.6);
+            border-bottom: 1px solid rgba(139, 92, 246, 0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-bright);
+        }
+
+        .editor-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .editor-btn {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--text-main);
+            padding: 0.4rem 0.8rem;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .editor-btn:hover {
+            background: rgba(139, 92, 246, 0.15);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .editor-btn.btn-save {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+            display: none;
+        }
+
+        .editor-btn.btn-save:hover {
+            background: #059669;
+            border-color: #059669;
+        }
+
+        .editor-body {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .code-viewer-pre {
+            margin: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 0;
+            background: #0a0814 !important;
+            overflow: auto;
+            font-size: 0.85rem;
+        }
+
+        .code-textarea {
+            width: 100%;
+            height: 100%;
+            background: #0a0814;
+            color: #f3f4f6;
+            border: none;
+            outline: none;
+            padding: 1.5rem;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            resize: none;
+            display: none;
+            tab-size: 4;
+        }
+
+        .editor-placeholder {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            gap: 1rem;
+            background: #0a0814;
+        }
+
+        .editor-placeholder i {
+            font-size: 3rem;
+            color: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Animations */
+        @keyframes pulse-glow {
+            0% { filter: drop-shadow(0 0 4px rgba(139, 92, 246, 0.3)); }
+            100% { filter: drop-shadow(0 0 12px rgba(139, 92, 246, 0.7)); }
+        }
+
+        /* Tooltip style */
+        .tooltip {
+            position: relative;
+        }
+
+        /* Responsive Iframe Device Sizes */
+        .size-desktop {
+            width: 100%;
+            height: 100%;
+        }
+
+        .size-tablet {
+            width: 768px;
+            height: 1024px;
+            max-height: 100%;
+        }
+
+        .size-mobile {
+            width: 375px;
+            height: 730px;
+            max-height: 100%;
+        }
+
+        /* Status indicator dots */
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 0.5rem;
+        }
+        .dot-idle { background: var(--text-muted); }
+        .dot-running { background: var(--warning); animation: pulse-blink 1.5s infinite; }
+        .dot-done { background: var(--success); }
+        .dot-error { background: var(--danger); }
+
+        @keyframes pulse-blink {
+            0% { opacity: 0.4; }
+            50% { opacity: 1; }
+            100% { opacity: 0.4; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-container">
+            <i class="fa-solid fa-wand-magic-sparkles logo-icon"></i>
+            <span class="logo-text">Lovable Clone</span>
+            <span class="logo-badge">Grok Powered</span>
+        </div>
+        <div class="preview-address-bar" id="app-url-display">
+            <i class="fa-solid fa-globe"></i>
+            <span>localhost:8000/preview</span>
+        </div>
+        <div class="model-badge">
+            <i class="fa-solid fa-brain"></i>
+            <span>openai/gpt-oss-120b</span>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="section-title">
+                <i class="fa-solid fa-circle-play"></i>
+                <span>App Prompt</span>
+            </div>
+
+            <div class="input-card">
+                <textarea id="prompt-input" placeholder="Describe the application you want to build... (e.g. Build a colorful modern task manager with dashboard analytics, charts, and dark mode toggling)"></textarea>
+                
+                <div class="suggestions">
+                    <button class="suggestion-btn" data-prompt="Build a colorful modern todo app in html css and js with categories and charts">🎯 Todo App</button>
+                    <button class="suggestion-btn" data-prompt="Build a sleek personal portfolio website for a developer with project cards and dark mode">💼 Developer Portfolio</button>
+                    <button class="suggestion-btn" data-prompt="Build an elegant weather forecast dashboard showing 5 day trends and local alerts">🌤️ Weather Dashboard</button>
+                    <button class="suggestion-btn" data-prompt="Build a responsive tic-tac-toe game with AI opponent, scoring system, and particle effects">🎮 Tic-Tac-Toe AI</button>
+                </div>
+
+                <button class="btn-generate" id="generate-btn">
+                    <i class="fa-solid fa-bolt"></i>
+                    <span>Generate Application</span>
+                </button>
+            </div>
+
+            <div class="status-tracker">
+                <div class="section-title">
+                    <i class="fa-solid fa-bars-progress"></i>
+                    <span>Agent Operations</span>
+                </div>
+
+                <div class="step-item" id="step-planner">
+                    <div class="step-icon">1</div>
+                    <div class="step-content">
+                        <span class="step-title">Planner Agent</span>
+                        <span class="step-desc" id="planner-desc">Deconstructs user request and creates application structure.</span>
+                    </div>
+                </div>
+
+                <div class="step-item" id="step-architect">
+                    <div class="step-icon">2</div>
+                    <div class="step-content">
+                        <span class="step-title">Architect Agent</span>
+                        <span class="step-desc" id="architect-desc">Creates precise file specifications and implementation order.</span>
+                    </div>
+                </div>
+
+                <div class="step-item" id="step-coder">
+                    <div class="step-icon">3</div>
+                    <div class="step-content">
+                        <span class="step-title">Coder Agent</span>
+                        <span class="step-desc" id="coder-desc">Generates code files and verifies correct integration.</span>
+                        <div class="progress-bar-container" id="coder-progress-container">
+                            <div class="progress-bar-fill" id="coder-progress-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Console Logs -->
+            <div class="console-card">
+                <div class="console-header">
+                    <span><i class="fa-solid fa-terminal"></i> Console logs</span>
+                    <span id="console-status"><span class="status-dot dot-idle"></span>Idle</span>
+                </div>
+                <div class="console-body" id="console-body">> Terminal ready. Send a prompt to begin generation...</div>
+            </div>
+        </div>
+
+        <!-- Showcase Area -->
+        <div class="showcase">
+            <div class="tabs-header">
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="preview">
+                        <i class="fa-solid fa-circle-notch fa-spin-fast fa-fw" style="display: none;" id="preview-tab-spinner"></i>
+                        <i class="fa-solid fa-display"></i>
+                        <span>Live Preview</span>
+                    </button>
+                    <button class="tab-btn" data-tab="code">
+                        <i class="fa-solid fa-code"></i>
+                        <span>Code Explorer & Editor</span>
+                    </button>
+                </div>
+
+                <div class="preview-controls" id="preview-controls-bar">
+                    <button class="control-btn active" data-size="desktop" title="Desktop Size"><i class="fa-solid fa-desktop"></i></button>
+                    <button class="control-btn" data-size="tablet" title="Tablet Size"><i class="fa-solid fa-tablet-screen-button"></i></button>
+                    <button class="control-btn" data-size="mobile" title="Mobile Size"><i class="fa-solid fa-mobile-screen-button"></i></button>
+                    <div style="width: 1px; height: 20px; background: rgba(255,255,255,0.1); margin: 0 0.25rem;"></div>
+                    <button class="control-btn" id="refresh-preview-btn" title="Refresh Page"><i class="fa-solid fa-rotate-right"></i></button>
+                    <button class="control-btn" id="new-tab-preview-btn" title="Open in New Tab"><i class="fa-solid fa-arrow-up-right-from-square"></i></button>
+                </div>
+            </div>
+
+            <!-- Preview Tab -->
+            <div class="tab-panel active" id="preview-panel">
+                <div class="iframe-container size-desktop" id="iframe-wrapper">
+                    <div class="iframe-placeholder" id="preview-placeholder">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        <h3>Your Web App Live Preview</h3>
+                        <p style="max-width: 400px; font-size: 0.9rem;">Give a prompt on the left sidebar to generate your app. It will appear here dynamically as files are written.</p>
+                    </div>
+                    <iframe id="app-preview-iframe" src="" style="display: none;"></iframe>
+                </div>
+            </div>
+
+            <!-- Code Tab -->
+            <div class="tab-panel" id="code-panel">
+                <div class="code-explorer">
+                    <div class="explorer-header">
+                        <span>Workspace Files</span>
+                        <button class="control-btn" id="refresh-files-btn" style="width: 24px; height: 24px; font-size: 0.75rem;"><i class="fa-solid fa-arrows-rotate"></i></button>
+                    </div>
+                    <div class="explorer-tree" id="files-tree">
+                        <!-- Filled by Javascript -->
+                        <div style="padding: 1rem; color: var(--text-muted); font-size: 0.8rem; text-align: center;">No files generated yet.</div>
+                    </div>
+                </div>
+
+                <div class="code-editor">
+                    <div class="editor-header">
+                        <div class="file-info" id="active-file-title">
+                            <i class="fa-regular fa-file-code"></i>
+                            <span>No File Selected</span>
+                        </div>
+                        <div class="editor-actions">
+                            <button class="editor-btn" id="edit-toggle-btn" style="display: none;">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                                <span>Edit Code</span>
+                            </button>
+                            <button class="editor-btn btn-save" id="save-file-btn">
+                                <i class="fa-solid fa-floppy-disk"></i>
+                                <span>Save Changes</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="editor-body">
+                        <div class="editor-placeholder" id="editor-placeholder">
+                            <i class="fa-solid fa-folder-open"></i>
+                            <p>Select a file from the workspace explorer to view/edit content.</p>
+                        </div>
+                        <textarea class="code-textarea" id="editor-textarea" spellcheck="false"></textarea>
+                        <pre class="code-viewer-pre" id="editor-viewer-container" style="display: none;"><code class="language-markup" id="editor-codeblock"></code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Prism JS and plugins -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+    
+    <script>
+        // State variables
+        let isGenerating = false;
+        let activeTab = 'preview';
+        let activeFile = null;
+        let isEditing = false;
+        let originalContent = '';
+        let lastStatusMessage = '';
+        let lastLogsLength = 0;
+
+        // Elements
+        const promptInput = document.getElementById('prompt-input');
+        const generateBtn = document.getElementById('generate-btn');
+        const consoleBody = document.getElementById('console-body');
+        const consoleStatus = document.getElementById('console-status');
+        const previewIframe = document.getElementById('app-preview-iframe');
+        const previewPlaceholder = document.getElementById('preview-placeholder');
+        const iframeWrapper = document.getElementById('iframe-wrapper');
+        const filesTree = document.getElementById('files-tree');
+        const activeFileTitle = document.getElementById('active-file-title');
+        const editToggleBtn = document.getElementById('edit-toggle-btn');
+        const saveFileBtn = document.getElementById('save-file-btn');
+        const editorPlaceholder = document.getElementById('editor-placeholder');
+        const editorTextarea = document.getElementById('editor-textarea');
+        const editorViewerContainer = document.getElementById('editor-viewer-container');
+        const editorCodeblock = document.getElementById('editor-codeblock');
+        const appUrlDisplay = document.getElementById('app-url-display');
+        
+        // Steps tracking elements
+        const stepPlanner = document.getElementById('step-planner');
+        const plannerDesc = document.getElementById('planner-desc');
+        const stepArchitect = document.getElementById('step-architect');
+        const architectDesc = document.getElementById('architect-desc');
+        const stepCoder = document.getElementById('step-coder');
+        const coderDesc = document.getElementById('coder-desc');
+        const coderProgressContainer = document.getElementById('coder-progress-container');
+        const coderProgressFill = document.getElementById('coder-progress-fill');
+        const previewTabSpinner = document.getElementById('preview-tab-spinner');
+
+        // Initial setup
+        window.addEventListener('DOMContentLoaded', () => {
+            // Setup suggestions
+            document.querySelectorAll('.suggestion-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    promptInput.value = btn.getAttribute('data-prompt');
+                });
+            });
+
+            // Tab Swings
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const target = btn.getAttribute('data-tab');
+                    switchTab(target);
+                });
+            });
+
+            // Preview controls
+            document.querySelectorAll('[data-size]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('[data-size]').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    const size = btn.getAttribute('data-size');
+                    iframeWrapper.className = 'iframe-container size-' + size;
+                });
+            });
+
+            // Generate trigger
+            generateBtn.addEventListener('click', startGeneration);
+
+            // Refreshes
+            document.getElementById('refresh-preview-btn').addEventListener('click', refreshPreview);
+            document.getElementById('new-tab-preview-btn').addEventListener('click', openInNewTab);
+            document.getElementById('refresh-files-btn').addEventListener('click', loadFilesTree);
+            
+            // Editor action bindings
+            editToggleBtn.addEventListener('click', toggleEditMode);
+            saveFileBtn.addEventListener('click', saveFileChanges);
+
+            // Start polling status
+            pollStatus();
+            setInterval(pollStatus, 1500);
+            loadFilesTree();
+        });
+
+        // Tab selection logic
+        function switchTab(tabName) {
+            activeTab = tabName;
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('data-tab') === tabName);
+            });
+            document.querySelectorAll('.tab-panel').forEach(panel => {
+                panel.classList.toggle('active', panel.id === tabName + '-panel');
+            });
+            
+            // Hide or show size controls bar
+            document.getElementById('preview-controls-bar').style.display = tabName === 'preview' ? 'flex' : 'none';
+        }
+
+        // Trigger generating
+        async function startGeneration() {
+            const prompt = promptInput.value.trim();
+            if (!prompt) return;
+
+            isGenerating = true;
+            generateBtn.disabled = true;
+            generateBtn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Running Generator...`;
+            
+            // Clear consoles and steps
+            consoleBody.textContent = `> Starting LangGraph orchestration...\n`;
+            resetStepsUI();
+
+            try {
+                const res = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt })
+                });
+                
+                const data = await res.json();
+                if (res.ok) {
+                    addLogLine('System', 'Generation process launched in backend background thread.');
+                } else {
+                    addLogLine('Error', data.detail || 'Failed to start generation.');
+                    resetGenerationState();
+                }
+            } catch (err) {
+                addLogLine('Error', 'Network error calling start endpoint: ' + err.message);
+                resetGenerationState();
+            }
+        }
+
+        function resetStepsUI() {
+            stepPlanner.className = 'step-item';
+            plannerDesc.textContent = 'Deconstructs user request and creates application structure.';
+            stepArchitect.className = 'step-item';
+            architectDesc.textContent = 'Creates precise file specifications and implementation order.';
+            stepCoder.className = 'step-item';
+            coderDesc.textContent = 'Generates code files and verifies correct integration.';
+            coderProgressContainer.style.display = 'none';
+            coderProgressFill.style.style = '0%';
+        }
+
+        function resetGenerationState() {
+            isGenerating = false;
+            generateBtn.disabled = false;
+            generateBtn.innerHTML = `<i class="fa-solid fa-bolt"></i> <span>Generate Application</span>`;
+            previewTabSpinner.style.display = 'none';
+        }
+
+        // Live Log output helper
+        function addLogLine(prefix, content, type = 'info') {
+            const spanClass = `console-line-${type}`;
+            const timeStr = new Date().toLocaleTimeString();
+            consoleBody.innerHTML += `[${timeStr}] <span class="${spanClass}">[${prefix}]</span> ${content}\n`;
+            consoleBody.scrollTop = consoleBody.scrollHeight;
+        }
+
+        // Status Polling
+        async function pollStatus() {
+            try {
+                const res = await fetch('/api/status');
+                const data = await res.json();
+                
+                // Track logs updates
+                if (data.logs && data.logs.length !== lastLogsLength) {
+                    const newLogs = data.logs.substring(lastLogsLength);
+                    // Split logs and write lines
+                    const lines = newLogs.split('\n');
+                    lines.forEach(line => {
+                        if (line.trim()) {
+                            let type = 'info';
+                            if (line.includes('[ERROR]') || line.includes('Error')) type = 'error';
+                            else if (line.includes('completed') || line.includes('WROTE:') || line.includes('finished')) type = 'success';
+                            else if (line.includes('Implementing step')) type = 'warn';
+
+                            // Clean prefix
+                            let cleanLine = line;
+                            let prefix = 'Agent';
+                            if (line.startsWith('[')) {
+                                const endIdx = line.indexOf(']');
+                                if (endIdx !== -1) {
+                                    prefix = line.substring(1, endIdx);
+                                    cleanLine = line.substring(endIdx + 1).trim();
+                                }
+                            }
+                            addLogLine(prefix, cleanLine, type);
+                        }
+                    });
+                    lastLogsLength = data.logs.length;
+                }
+
+                // Update UI state based on process running state
+                if (data.is_running) {
+                    isGenerating = true;
+                    generateBtn.disabled = true;
+                    generateBtn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Generating App...`;
+                    previewTabSpinner.style.display = 'inline-block';
+                    consoleStatus.innerHTML = `<span class="status-dot dot-running"></span>Generating`;
+                } else {
+                    if (isGenerating) {
+                        // Just finished
+                        resetGenerationState();
+                        loadFilesTree();
+                        refreshPreview();
+                        addLogLine('System', 'Application Generation finished. Opening Preview.', 'success');
+                    }
+                    consoleStatus.innerHTML = `<span class="status-dot ${data.done ? 'dot-done' : 'dot-idle'}"></span>${data.done ? 'Finished' : 'Idle'}`;
+                }
+
+                // Update Steps UI
+                if (data.phase === 'planner') {
+                    stepPlanner.className = 'step-item active';
+                    plannerDesc.textContent = data.message;
+                } else if (data.phase === 'architect') {
+                    stepPlanner.className = 'step-item completed';
+                    plannerDesc.textContent = 'Project plan generated.';
+                    
+                    stepArchitect.className = 'step-item active';
+                    architectDesc.textContent = data.message;
+                } else if (data.phase === 'coder') {
+                    stepPlanner.className = 'step-item completed';
+                    stepArchitect.className = 'step-item completed';
+                    architectDesc.textContent = 'Implementation plan generated.';
+                    
+                    stepCoder.className = 'step-item active';
+                    coderDesc.textContent = data.message;
+                    
+                    if (data.total_steps > 0) {
+                        coderProgressContainer.style.display = 'block';
+                        const percentage = ((data.current_step + 1) / data.total_steps) * 100;
+                        coderProgressFill.style.width = percentage + '%';
+                    }
+                } else if (data.done) {
+                    stepPlanner.className = 'step-item completed';
+                    stepArchitect.className = 'step-item completed';
+                    stepCoder.className = 'step-item completed';
+                    coderDesc.textContent = 'All files implemented and ready.';
+                    coderProgressContainer.style.display = 'none';
+                    previewTabSpinner.style.display = 'none';
+                }
+
+            } catch (err) {
+                console.error("Status polling failed:", err);
+            }
+        }
+
+        // Preview rendering actions
+        function refreshPreview() {
+            // Verify if index.html is generated, otherwise show placeholder
+            fetch('/api/files')
+                .then(res => res.json())
+                .then(files => {
+                    const hasIndex = files.some(f => f.name === 'index.html' || (f.type === 'directory' && f.children.some(c => c.name === 'index.html')));
+                    if (hasIndex) {
+                        previewPlaceholder.style.display = 'none';
+                        previewIframe.style.display = 'block';
+                        // Force refresh iframe with query param to prevent caching
+                        previewIframe.src = `/preview/index.html?t=${Date.now()}`;
+                        appUrlDisplay.querySelector('span').textContent = `localhost:8000/preview/index.html`;
+                    } else {
+                        previewPlaceholder.style.display = 'flex';
+                        previewIframe.style.display = 'none';
+                        previewIframe.src = '';
+                    }
+                })
+                .catch(err => console.error("Error checking preview index:", err));
+        }
+
+        function openInNewTab() {
+            window.open('/preview/index.html', '_blank');
+        }
+
+        // File Explorer rendering
+        async function loadFilesTree() {
+            try {
+                const res = await fetch('/api/files');
+                const files = await res.json();
+                
+                if (files.length === 0) {
+                    filesTree.innerHTML = `<div style="padding: 1rem; color: var(--text-muted); font-size: 0.8rem; text-align: center;">No files generated yet.</div>`;
+                    return;
+                }
+
+                filesTree.innerHTML = '';
+                renderTreeNodes(files, filesTree);
+            } catch (err) {
+                filesTree.innerHTML = `<div style="padding: 1rem; color: var(--danger); font-size: 0.8rem; text-align: center;">Error loading files</div>`;
+            }
+        }
+
+        function renderTreeNodes(nodes, containerElement) {
+            nodes.forEach(node => {
+                const nodeEl = document.createElement('div');
+                
+                if (node.type === 'directory') {
+                    const itemEl = document.createElement('div');
+                    itemEl.className = 'tree-item';
+                    itemEl.innerHTML = `<i class="fa-solid fa-folder"></i> <span>${node.name}</span>`;
+                    
+                    const childrenEl = document.createElement('div');
+                    childrenEl.className = 'tree-folder-children';
+                    
+                    // Folder toggle expand collapse
+                    itemEl.addEventListener('click', () => {
+                        const icon = itemEl.querySelector('i');
+                        childrenEl.classList.toggle('collapsed');
+                        if (childrenEl.classList.contains('collapsed')) {
+                            icon.className = 'fa-solid fa-folder';
+                        } else {
+                            icon.className = 'fa-solid fa-folder-open';
+                        }
+                    });
+
+                    renderTreeNodes(node.children, childrenEl);
+                    nodeEl.appendChild(itemEl);
+                    nodeEl.appendChild(childrenEl);
+                } else {
+                    nodeEl.className = 'tree-item';
+                    let fileIcon = 'fa-regular fa-file-code';
+                    if (node.name.endsWith('.html')) fileIcon = 'fa-brands fa-html5';
+                    else if (node.name.endsWith('.css')) fileIcon = 'fa-brands fa-css3-alt';
+                    else if (node.name.endsWith('.js')) fileIcon = 'fa-brands fa-js';
+                    
+                    nodeEl.innerHTML = `<i class="${fileIcon}"></i> <span>${node.name}</span>`;
+                    
+                    nodeEl.addEventListener('click', () => {
+                        // Highlight selected
+                        document.querySelectorAll('.tree-item').forEach(el => el.classList.remove('selected'));
+                        nodeEl.classList.add('selected');
+                        
+                        loadFileContent(node.path);
+                    });
+                }
+                
+                containerElement.appendChild(nodeEl);
+            });
+        }
+
+        // Code load, view and edit functions
+        async function loadFileContent(filePath) {
+            try {
+                const res = await fetch(`/api/file?path=${encodeURIComponent(filePath)}`);
+                const data = await res.json();
+                
+                if (data.status === 'success') {
+                    activeFile = filePath;
+                    originalContent = data.content;
+                    
+                    // Configure editor header
+                    let fileIcon = 'fa-regular fa-file-code';
+                    if (filePath.endsWith('.html')) fileIcon = 'fa-brands fa-html5';
+                    else if (filePath.endsWith('.css')) fileIcon = 'fa-brands fa-css3-alt';
+                    else if (filePath.endsWith('.js')) fileIcon = 'fa-brands fa-js';
+                    
+                    activeFileTitle.innerHTML = `<i class="${fileIcon}"></i> <span>${filePath}</span>`;
+                    editToggleBtn.style.display = 'flex';
+                    saveFileBtn.style.display = 'none';
+                    isEditing = false;
+                    
+                    // Setup code display content
+                    editorPlaceholder.style.display = 'none';
+                    editorTextarea.style.display = 'none';
+                    editorViewerContainer.style.display = 'block';
+                    
+                    // Prism highlight configuration
+                    let lang = 'markup'; // html
+                    if (filePath.endsWith('.css')) lang = 'css';
+                    else if (filePath.endsWith('.js') || filePath.endsWith('.json')) lang = 'javascript';
+                    else if (filePath.endsWith('.py')) lang = 'python';
+                    
+                    editorCodeblock.className = `language-${lang}`;
+                    // Escape HTML entities to show them literally in code block
+                    editorCodeblock.textContent = data.content;
+                    Prism.highlightElement(editorCodeblock);
+                } else {
+                    alert('Error loading file: ' + data.message);
+                }
+            } catch (err) {
+                alert('Network error loading file contents.');
+            }
+        }
+
+        function toggleEditMode() {
+            if (!activeFile) return;
+            
+            isEditing = !isEditing;
+            if (isEditing) {
+                // Switch to edit mode
+                editorTextarea.value = originalContent;
+                editorTextarea.style.display = 'block';
+                editorViewerContainer.style.display = 'none';
+                saveFileBtn.style.display = 'flex';
+                editToggleBtn.innerHTML = `<i class="fa-solid fa-xmark"></i> <span>Cancel</span>`;
+            } else {
+                // Cancel edit mode
+                editorTextarea.style.display = 'none';
+                editorViewerContainer.style.display = 'block';
+                saveFileBtn.style.display = 'none';
+                editToggleBtn.innerHTML = `<i class="fa-solid fa-pen-to-square"></i> <span>Edit Code</span>`;
+            }
+        }
+
+        async function saveFileChanges() {
+            if (!activeFile || !isEditing) return;
+
+            const updatedContent = editorTextarea.value;
+            
+            try {
+                const res = await fetch('/api/save-file', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        path: activeFile,
+                        content: updatedContent
+                    })
+                });
+                
+                const data = await res.json();
+                if (data.status === 'success') {
+                    originalContent = updatedContent;
+                    isEditing = false;
+                    
+                    // Re-render prism viewer
+                    editorTextarea.style.display = 'none';
+                    editorViewerContainer.style.display = 'block';
+                    saveFileBtn.style.display = 'none';
+                    editToggleBtn.innerHTML = `<i class="fa-solid fa-pen-to-square"></i> <span>Edit Code</span>`;
+                    
+                    editorCodeblock.textContent = updatedContent;
+                    Prism.highlightElement(editorCodeblock);
+                    
+                    // Update preview and logs
+                    addLogLine('System', `Successfully manual-saved file changes: ${activeFile}`, 'success');
+                    refreshPreview();
+                } else {
+                    alert('Error saving file changes: ' + data.detail);
+                }
+            } catch (err) {
+                alert('Network error saving file changes.');
+            }
+        }
+    </script>
+</body>
+</html>
