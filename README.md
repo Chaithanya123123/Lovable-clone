@@ -96,9 +96,3 @@ generated_project/
 - `GET /api/file?path=...` reads a generated file.
 - `POST /api/save-file` saves edits to a generated file.
 - `GET /preview/index.html` serves the generated app preview.
-
-## Notes
-
-- Generated output is intentionally ignored by Git through `generated_project/`.
-- The app expects a Groq-compatible model configured in `agent/graph.py`.
-- The dashboard loads some frontend assets from CDNs, so the browser UI needs internet access for full styling and icons.
