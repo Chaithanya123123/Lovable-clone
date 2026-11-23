@@ -3,3 +3,5 @@
 __pycache__/
 *.pyc
 generated_project/
+.agent_logs.txt
+.agent_status.json
