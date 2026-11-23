@@ -5,7 +5,6 @@ import threading
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
-from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from agent.graph import run_agent
@@ -17,14 +16,8 @@ PROJECT_ROOT.mkdir(parents=True, exist_ok=True)
 
 app = FastAPI(title="Lovable Clone Server")
 
-# Allow CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# No CORS: the dashboard is served from this same address, and the API can write files,
+# so other websites must not be able to call it.
 
 generation_thread = None
 current_prompt = None
@@ -35,7 +28,7 @@ class GenerateRequest(BaseModel):
 @app.post("/api/generate")
 def generate_app(req: GenerateRequest):
     global generation_thread, current_prompt
-    prompt = req.prompt
+    prompt = req.prompt.strip()
     if not prompt:
         raise HTTPException(status_code=400, detail="Prompt is required")
     

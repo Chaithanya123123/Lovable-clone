@@ -1125,7 +1125,7 @@
             stepCoder.className = 'step-item';
             coderDesc.textContent = 'Generates code files and verifies correct integration.';
             coderProgressContainer.style.display = 'none';
-            coderProgressFill.style.style = '0%';
+            coderProgressFill.style.width = '0%';
         }
 
         function resetGenerationState() {
@@ -1139,7 +1139,11 @@
         function addLogLine(prefix, content, type = 'info') {
             const spanClass = `console-line-${type}`;
             const timeStr = new Date().toLocaleTimeString();
-            consoleBody.innerHTML += `[${timeStr}] <span class="${spanClass}">[${prefix}]</span> ${content}\n`;
+            // Logs contain generated HTML, so add them as text and never as markup.
+            const tag = document.createElement('span');
+            tag.className = spanClass;
+            tag.textContent = `[${prefix}]`;
+            consoleBody.append(`[${timeStr}] `, tag, ` ${content}\n`);
             consoleBody.scrollTop = consoleBody.scrollHeight;
         }
 
@@ -1147,9 +1151,12 @@
         async function pollStatus() {
             try {
                 const res = await fetch('/api/status');
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 const data = await res.json();
                 
                 // Track logs updates
+                // A new run restarts the log file.
+                if ((data.logs || '').length < lastLogsLength) lastLogsLength = 0;
                 if (data.logs && data.logs.length !== lastLogsLength) {
                     const newLogs = data.logs.substring(lastLogsLength);
                     // Split logs and write lines
@@ -1190,13 +1197,26 @@
                         resetGenerationState();
                         loadFilesTree();
                         refreshPreview();
-                        addLogLine('System', 'Application Generation finished. Opening Preview.', 'success');
+                        if (data.error) {
+                            addLogLine('Error', `Generation failed: ${data.error}`, 'error');
+                        } else {
+                            addLogLine('System', 'Application Generation finished. Opening Preview.', 'success');
+                        }
                     }
-                    consoleStatus.innerHTML = `<span class="status-dot ${data.done ? 'dot-done' : 'dot-idle'}"></span>${data.done ? 'Finished' : 'Idle'}`;
+                    consoleStatus.innerHTML = `<span class="status-dot ${data.done && !data.error ? 'dot-done' : 'dot-idle'}"></span>${data.error ? 'Failed' : data.done ? 'Finished' : 'Idle'}`;
                 }
 
                 // Update Steps UI
-                if (data.phase === 'planner') {
+                if (data.error) {
+                    previewTabSpinner.style.display = 'none';
+                } else if (data.done) {
+                    stepPlanner.className = 'step-item completed';
+                    stepArchitect.className = 'step-item completed';
+                    stepCoder.className = 'step-item completed';
+                    coderDesc.textContent = 'All files implemented and ready.';
+                    coderProgressContainer.style.display = 'none';
+                    previewTabSpinner.style.display = 'none';
+                } else if (data.phase === 'planner') {
                     stepPlanner.className = 'step-item active';
                     plannerDesc.textContent = data.message;
                 } else if (data.phase === 'architect') {
@@ -1218,17 +1238,10 @@
                         const percentage = ((data.current_step + 1) / data.total_steps) * 100;
                         coderProgressFill.style.width = percentage + '%';
                     }
-                } else if (data.done) {
-                    stepPlanner.className = 'step-item completed';
-                    stepArchitect.className = 'step-item completed';
-                    stepCoder.className = 'step-item completed';
-                    coderDesc.textContent = 'All files implemented and ready.';
-                    coderProgressContainer.style.display = 'none';
-                    previewTabSpinner.style.display = 'none';
                 }
 
             } catch (err) {
-                console.error("Status polling failed:", err);
+                consoleStatus.innerHTML = `<span class="status-dot dot-idle"></span>Server unreachable, retrying`;
             }
         }
 
@@ -1244,7 +1257,7 @@
                         previewIframe.style.display = 'block';
                         // Force refresh iframe with query param to prevent caching
                         previewIframe.src = `/preview/index.html?t=${Date.now()}`;
-                        appUrlDisplay.querySelector('span').textContent = `localhost:8000/preview/index.html`;
+                        appUrlDisplay.querySelector('span').textContent = `${location.host}/preview/index.html`;
                     } else {
                         previewPlaceholder.style.display = 'flex';
                         previewIframe.style.display = 'none';

@@ -24,7 +24,7 @@ RULES:
 
 CRITICAL FORMATTING RULES FOR JSON SAFETY:
 - The 'task_description' MUST be a clean, plain text paragraph.
-- Do NOT use any double quotes ("), backslashes (\), newlines (\n), or markdown code blocks (```) inside the task_description string. 
+- Do NOT use any double quotes ("), backslashes (\\), newlines (\\n), or markdown code blocks (```) inside the task_description string. 
 - Use simple single quotes (') for code snippets if needed, but keep it mostly plain text.
 - Do NOT include any JSON escape sequences.
 
